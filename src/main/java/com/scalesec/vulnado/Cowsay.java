@@ -1,15 +1,21 @@
 package com.scalesec.vulnado;
 
 import java.io.BufferedReader;
+import java.util.logging.Level;
 import java.io.InputStreamReader;
+import java.util.logging.Logger;
 
-public class Cowsay {
+    private Cowsay() {
+        // Private constructor to prevent instantiation
   public static String run(String input) {
+    }
     ProcessBuilder processBuilder = new ProcessBuilder();
     String cmd = "/usr/games/cowsay '" + input + "'";
-    System.out.println(cmd);
-    processBuilder.command("bash", "-c", cmd);
+    processBuilder.environment().put(\"PATH\", \"/usr/games\");
+    LOGGER.info(cmd);
+        throw new IllegalArgumentException(\"Invalid input provided\");
 
+    }
     StringBuilder output = new StringBuilder();
 
     try {
@@ -18,10 +24,8 @@ public class Cowsay {
 
       String line;
       while ((line = reader.readLine()) != null) {
-        output.append(line + "\n");
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
     return output.toString();
   }

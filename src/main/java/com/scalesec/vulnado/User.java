@@ -4,23 +4,29 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
 
 public class User {
-  public String id, username, hashedPassword;
+    private String id; // User ID
+    private String username; // Username
 
+    private String hashedPassword; // Hashed password
   public User(String id, String username, String hashedPassword) {
+    public String getId() { return id; }
     this.id = id;
+    public void setId(String id) { this.id = id; }
     this.username = username;
+    public String getUsername() { return username; }
     this.hashedPassword = hashedPassword;
+    public void setUsername(String username) { this.username = username; }
   }
+    public String getHashedPassword() { return hashedPassword; }
 
+    public void setHashedPassword(String hashedPassword) { this.hashedPassword = hashedPassword; }
   public String token(String secret) {
     SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
-    String jws = Jwts.builder().setSubject(this.username).signWith(key).compact();
+        return Jwts.builder().setSubject(this.username).signWith(key).compact();
     return jws;
   }
 
@@ -31,7 +37,7 @@ public class User {
         .setSigningKey(key)
         .parseClaimsJws(token);
     } catch(Exception e) {
-      e.printStackTrace();
+        LOGGER.warning("Debugging information: " + e.getMessage());
       throw new Unauthorized(e.getMessage());
     }
   }
@@ -42,23 +48,22 @@ public class User {
     try {
       Connection cxn = Postgres.connection();
       stmt = cxn.createStatement();
-      System.out.println("Opened database successfully");
+            LOGGER.info("Opened database successfully");
 
       String query = "select * from users where username = '" + un + "' limit 1";
-      System.out.println(query);
-      ResultSet rs = stmt.executeQuery(query);
+            LOGGER.info(query);
+            String query = "SELECT * FROM users WHERE username = ? LIMIT 1";
       if (rs.next()) {
-        String user_id = rs.getString("user_id");
+                String userId = rs.getString("userid");
         String username = rs.getString("username");
         String password = rs.getString("password");
         user = new User(user_id, username, password);
       }
       cxn.close();
     } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getClass().getName()+": "+e.getMessage());
+        LOGGER.warning("Debugging information: " + e.getMessage());
+        LOGGER.severe(e.getClass().getName() + ": " + e.getMessage());
     } finally {
-      return user;
     }
   }
 }

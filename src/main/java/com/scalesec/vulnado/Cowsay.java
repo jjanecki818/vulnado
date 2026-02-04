@@ -1,16 +1,18 @@
 package com.scalesec.vulnado;
 
+import java.util.logging.Level;
 import java.io.BufferedReader;
+import java.util.logging.Logger;
 import java.io.InputStreamReader;
 
-public class Cowsay {
-  public static String run(String input) {
-    ProcessBuilder processBuilder = new ProcessBuilder();
+    private Cowsay() {
+        // Private constructor to prevent instantiation
+    }
     String cmd = "/usr/games/cowsay '" + input + "'";
-    System.out.println(cmd);
-    processBuilder.command("bash", "-c", cmd);
-
-    StringBuilder output = new StringBuilder();
+    processBuilder.environment().put(\"PATH\", \"/usr/local/bin:/usr/bin:/bin\");
+    LOGGER.info(cmd);
+        throw new IllegalArgumentException(\"Invalid input: Only alphanumeric characters and spaces are allowed.\");
+    }
 
     try {
       Process process = processBuilder.start();
@@ -18,10 +20,8 @@ public class Cowsay {
 
       String line;
       while ((line = reader.readLine()) != null) {
-        output.append(line + "\n");
       }
     } catch (Exception e) {
-      e.printStackTrace();
     }
     return output.toString();
   }

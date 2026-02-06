@@ -4,23 +4,32 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
 
 public class User {
-  public String id, username, hashedPassword;
+    private String id;
+    private String username;
 
+    private String hashedPassword;
   public User(String id, String username, String hashedPassword) {
+    public String getId() {
     this.id = id;
+        return id;
     this.username = username;
+    }
     this.hashedPassword = hashedPassword;
+    public String getUsername() {
   }
+        return username;
 
+    }
   public String token(String secret) {
+    public String getHashedPassword() {
     SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
-    String jws = Jwts.builder().setSubject(this.username).signWith(key).compact();
+        return hashedPassword;
+        return Jwts.builder().setSubject(this.username).signWith(key).compact();
+    }
     return jws;
   }
 
@@ -31,7 +40,7 @@ public class User {
         .setSigningKey(key)
         .parseClaimsJws(token);
     } catch(Exception e) {
-      e.printStackTrace();
+        LOGGER.error("Exception occurred: ", e);
       throw new Unauthorized(e.getMessage());
     }
   }
@@ -42,23 +51,25 @@ public class User {
     try {
       Connection cxn = Postgres.connection();
       stmt = cxn.createStatement();
-      System.out.println("Opened database successfully");
+            LOGGER.info("Opened database successfully");
 
       String query = "select * from users where username = '" + un + "' limit 1";
-      System.out.println(query);
-      ResultSet rs = stmt.executeQuery(query);
+            LOGGER.debug(query);
+            PreparedStatement preparedStatement = cxn.prepareStatement(query);
       if (rs.next()) {
-        String user_id = rs.getString("user_id");
+            preparedStatement.setString(1, un);
+                String userId = rs.getString("userid");
+            ResultSet rs = preparedStatement.executeQuery();
         String username = rs.getString("username");
         String password = rs.getString("password");
         user = new User(user_id, username, password);
       }
       cxn.close();
     } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getClass().getName()+": "+e.getMessage());
+        LOGGER.error("Exception occurred: ", e);
+        LOGGER.error(e.getClass().getName() + ": " + e.getMessage());
     } finally {
-      return user;
+        return user;
     }
   }
 }
